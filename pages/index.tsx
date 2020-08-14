@@ -1,24 +1,23 @@
-import Head from "next/head";
-import Link from "next/link";
+import Head from 'next/head'
+import Link from 'next/link'
+import * as React from 'react'
 
-import Layout, { siteTitle } from "../components/layout";
-import Date from "../components/date";
-import { getSortedPostsData, SortedPostsData } from "../lib/posts";
+import Layout, { siteTitle } from '../components/layout'
+import Date from '../components/date'
+import { getSortedPostsData, SortedPostsData } from '../lib/posts'
 
-import utilStyles from "../styles/utils.module.css";
+import utilStyles from '../styles/utils.module.css'
 
 export const getStaticProps = async (): Promise<{
-  props: { allPostsData: SortedPostsData };
+  props: { allPostsData: SortedPostsData }
 }> => {
-  const allPostsData = await getSortedPostsData();
+  const allPostsData = await getSortedPostsData()
   return {
-    props: { allPostsData },
-  };
-};
+    props: { allPostsData }
+  }
+}
 
-const Home: React.FC<{ allPostsData: SortedPostsData }> = ({
-  allPostsData,
-}) => {
+const Home: React.FC<{ allPostsData: SortedPostsData }> = ({ allPostsData }) => {
   return (
     <Layout home>
       <Head>
@@ -27,8 +26,7 @@ const Home: React.FC<{ allPostsData: SortedPostsData }> = ({
       <section className={utilStyles.headingMd}>
         <p>[Your Self Introduction]</p>
         <p>
-          (This is a sample website - you’ll be building a site like this on{" "}
-          <a href="https://nextjs.org/learn">our Next.js tutorial</a>.)
+          (This is a sample website - you’ll be building a site like this on <a href="https://nextjs.org/learn">our Next.js tutorial</a>.)
         </p>
       </section>
       <section className={`${utilStyles.headingMd} ${utilStyles.padding1px}`}>
@@ -48,7 +46,7 @@ const Home: React.FC<{ allPostsData: SortedPostsData }> = ({
         </ul>
       </section>
     </Layout>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home

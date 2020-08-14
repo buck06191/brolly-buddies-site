@@ -1,10 +1,11 @@
-import Head from "next/head";
+import Head from 'next/head'
+import * as React from 'react'
 
-import Layout from "../../components/layout";
-import Date from "../../components/date";
-import { getAllPostIds, getPostData, PostData, PostId } from "../../lib/posts";
+import Layout from '../../components/layout'
+import Date from '../../components/date'
+import { getAllPostIds, getPostData, PostData, PostId } from '../../lib/posts'
 
-import utilStyles from "../../styles/utils.module.css";
+import utilStyles from '../../styles/utils.module.css'
 
 const Post: React.FC<{ postData: PostData }> = ({ postData }) => {
   return (
@@ -20,31 +21,27 @@ const Post: React.FC<{ postData: PostData }> = ({ postData }) => {
         <div dangerouslySetInnerHTML={{ __html: postData.contentHtml }} />
       </article>
     </Layout>
-  );
-};
+  )
+}
 
 export const getStaticPaths = (): {
-  paths: Array<PostId>;
-  fallback: boolean;
+  paths: Array<PostId>
+  fallback: boolean
 } => {
-  const paths = getAllPostIds();
+  const paths = getAllPostIds()
   return {
     paths,
-    fallback: false,
-  };
-};
+    fallback: false
+  }
+}
 
-export const getStaticProps = async ({
-  params,
-}: {
-  params: { id: string };
-}): Promise<{ props: { postData: PostData } }> => {
-  const postData = await getPostData(params.id);
+export const getStaticProps = async ({ params }: { params: { id: string } }): Promise<{ props: { postData: PostData } }> => {
+  const postData = await getPostData(params.id)
   return {
     props: {
-      postData,
-    },
-  };
-};
+      postData
+    }
+  }
+}
 
-export default Post;
+export default Post
