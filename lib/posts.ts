@@ -1,60 +1,35 @@
-import fs from 'fs'
-import path from 'path'
-import matter from 'gray-matter'
-import remark from 'remark'
-import html from 'remark-html'
+import { fetchContentfulEntries, ContentType, PostData, fetchContentfulEntry } from './contentful-posts'
+import { removeUndefinedFields } from '../lib/utils'
 
-const postsDirectory = path.join(process.cwd(), 'posts')
-
-export interface PostData {
-  id: string
-  contentHtml: string
-  title: string
-  date: string
-}
-
-export interface PostId {
+export interface PostSlug {
   params: {
-    id: string
+    slug: string
   }
 }
 
 export type SortedPostsData = Array<PostData>
 
-export const getPostData = async (id: string): Promise<PostData> => {
-  // Read markdown file as string
-  const fullPath = path.join(postsDirectory, `${id}.md`)
-  const fileContents = fs.readFileSync(fullPath, 'utf8')
+export const parsePost = (entry: ContentType): PostData => {
+  const { sys, fields } = entry
+  return removeUndefinedFields({
+    title: fields.title,
+    date: fields.date,
+    body: fields.body,
+    coverImage: fields?.coverImage?.fields?.file,
+    alt: fields?.alt,
+    slug: fields.slug
+  })
+}
 
-  // Use gray-matter to parse the post metadata section
-  const matterResult = matter(fileContents)
-
-  // Use remark to convert markdown to HTML string
-  const processedContent = await remark().use(html).process(matterResult.content)
-
-  const contentHtml = processedContent.toString()
-
-  // Combine the data with the id
-  return {
-    id,
-    contentHtml,
-    ...(matterResult.data as { date: string; title: string })
-  }
+export const getPostData = async (slug: string): Promise<PostData[]> => {
+  const entries = await fetchContentfulEntry(slug)
+  return entries.map((entry) => parsePost(entry))
 }
 
 export const getSortedPostsData = async (): Promise<SortedPostsData> => {
-  // Get file names under /posts
-  const fileNames = fs.readdirSync(postsDirectory)
-  const allPostsData = await Promise.all(
-    fileNames.map(
-      (fileName: string): Promise<PostData> => {
-        const id = fileName.replace(/\.md$/, '')
-        return getPostData(id)
-      }
-    )
-  )
-  // Sort posts by date
-  return allPostsData.sort((a, b) => {
+  const entries = await fetchContentfulEntries()
+  const allPostsData = await Promise.all(entries.map(async (entry: ContentType) => await getPostData(entry.fields.slug)))
+  return allPostsData.flat().sort((a, b) => {
     if (a.date < b.date) {
       return 1
     } else {
@@ -63,26 +38,12 @@ export const getSortedPostsData = async (): Promise<SortedPostsData> => {
   })
 }
 
-export const getAllPostIds = (): Array<PostId> => {
-  const fileNames = fs.readdirSync(postsDirectory)
-
-  // Returns an array that looks like this:
-  // [
-  //   {
-  //     params: {
-  //       id: 'ssg-ssr'
-  //     }
-  //   },
-  //   {
-  //     params: {
-  //       id: 'pre-rendering'
-  //     }
-  //   }
-  // ]
-  return fileNames.map((fileName) => {
+export const getAllPostUrls = async (): Promise<Array<PostSlug>> => {
+  const entries = await getSortedPostsData()
+  return entries.map((post: PostData) => {
     return {
       params: {
-        id: fileName.replace(/\.md$/, '')
+        slug: post.slug
       }
     }
   })

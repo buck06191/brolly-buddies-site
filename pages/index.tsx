@@ -12,6 +12,7 @@ export const getStaticProps = async (): Promise<{
   props: { allPostsData: SortedPostsData }
 }> => {
   const allPostsData = await getSortedPostsData()
+  // const cleanedPosts = allPostsData.map((post) => removeUndefinedFields(post)) as SortedPostsData
   return {
     props: { allPostsData }
   }
@@ -32,17 +33,19 @@ const Home: React.FC<{ allPostsData: SortedPostsData }> = ({ allPostsData }) => 
       <section className={`${utilStyles.headingMd} ${utilStyles.padding1px}`}>
         <h2 className={utilStyles.headingLg}>Blog</h2>
         <ul className={utilStyles.list}>
-          {allPostsData.map(({ id, date, title }) => (
-            <li className={utilStyles.listItem} key={id}>
-              <Link href="/posts/[id]" as={`/posts/${id}`}>
-                <a>{title}</a>
-              </Link>
-              <br />
-              <small className={utilStyles.lightText}>
-                <Date dateString={date} />
-              </small>
-            </li>
-          ))}
+          {allPostsData.map(({ slug, date, title }) => {
+            return (
+              <li className={utilStyles.listItem} key={slug}>
+                <Link href="/posts/[slug]" as={`/posts/${slug}`}>
+                  <a>{title}</a>
+                </Link>
+                <br />
+                <small className={utilStyles.lightText}>
+                  <Date dateString={date} />
+                </small>
+              </li>
+            )
+          })}
         </ul>
       </section>
     </Layout>
